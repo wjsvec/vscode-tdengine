@@ -1,8 +1,9 @@
 {
-  "name": "extension-to-3-0",
-  "displayName": "extension_to_3.0",
-  "description": "\"for 3.0 extension\"",
-  "version": "0.0.1",
+  "name": "vscode-tdengine",
+  "displayName": "vscode-tdengine",
+  "description": "\"vs-code extension for TDengine 3.0 \"",
+  "icon": "resources/site-logo.png",
+  "version": "0.9.0",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -60,8 +61,8 @@
       "activitybar": [
         {
           "id": "package-explorer",
-          "title": "Package Explorer",
-          "icon": "resources/site-logo.png"
+          "title": "TDengine",
+          "icon": "resources/taos.svg"
         }
       ]
     },
@@ -69,7 +70,7 @@
       "package-explorer": [
         {
           "id": "nodeDependencies",
-          "name": "Node Dependencies",
+          "name": "Viewer",
           "icon": "resources/dep.svg",
           "contextualTitle": "TDengine"
         }

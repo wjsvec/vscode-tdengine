@@ -625,7 +625,7 @@ async function get_base_table(cursor) {
     let res = await promise.then(function (result) {
         let res = []
         for (let i = 0; i < result['data'].length; i++) {
-            if (i < 10) {
+            if (i < 100) {
                 // console.log(result['data'][i]['data'][0]);
                 res.push(result['data'][i]['data'][0]);
             }
