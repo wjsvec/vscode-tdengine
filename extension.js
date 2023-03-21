@@ -1,6 +1,8 @@
 const vscode = require('vscode');
 const taos = require("@tdengine/client");
 const path = require('path');
+const { Configuration, OpenAIApi } = require("openai");
+
 
 
 /**
@@ -187,7 +189,7 @@ function activate(context) {
                     switch (message.command) {
                         case 'alert':
                             
-                            
+                        if(message.sql_command != ""){
                             try{
                                 if(message.sql_command.slice(0,6) === 'select'){
                                     let sql_cmd;
@@ -214,7 +216,8 @@ function activate(context) {
 
                                     
                                 }
-                                command_panel.webview.html = await get_command_window(mem,message.sql_command);
+                                
+                                command_panel.webview.html = await get_command_window(mem,message.sql_command,chat_request_used,'');
                                 
                             }
                             catch (e){
@@ -222,6 +225,17 @@ function activate(context) {
                                 console.log(e);
                                 return;
                             }
+                            
+                        }
+                        let chat_request_used = message.chat_request;
+                        let gpt_response;
+                        if(chat_request_used!=""){
+                            gpt_response = String(await test_gpt("generate a SQL code for this       "+chat_request_used +"      if you can "));
+                            
+                            command_panel.webview.html = await get_command_window(mem,message.sql_command,chat_request_used,gpt_response);
+                            console.log(chat_request_used);
+
+                        }
                             
                             // console.log("select * from " + node['frombase'] + "." + node['label']+" order by "+ message.sort_item+ " limit 0,10")
                             
@@ -640,7 +654,7 @@ function getLoginContent() {
 </html>`;
 }
 
-async function get_command_window(sql_res,sql_mem) {
+async function get_command_window(sql_res,sql_mem,chat_request,gpt_response) {
     
 
     return `<!DOCTYPE html>
@@ -661,6 +675,13 @@ async function get_command_window(sql_res,sql_mem) {
     </div>
     <div class="col-sm-4 "> <button class="btn btn-light" type="button" onclick="myFunction()">Excute sql</button></div>
 	  ` + sql_res + `
+      <br/>
+      <br/>
+      <div class="col-sm-8 " ><textarea style="height:100px;width:1000px;" id="chat_request" type="text" placeholder= "`+chat_request+`" name="sql_command" ></textarea></div>
+    
+      </div>
+      <div class="col-sm-4 "> <button class="btn btn-light" type="button" onclick="myFunction()">Get gpt SQL help 😊</button></div>
+      <div class="bg-black text-white">`+gpt_response+`</div>
   </div>
 	  <script>
 	const vscode = acquireVsCodeApi();
@@ -670,6 +691,7 @@ async function get_command_window(sql_res,sql_mem) {
         vscode.postMessage({
             command: 'alert',
             sql_command:  document.getElementById("sql_command").value,
+            chat_request: document.getElementById("chat_request").value
         });
     }
     </script>
@@ -799,3 +821,17 @@ async function get_base_table(cursor) {
     return res
 }
 
+async function test_gpt(content_used){
+    const configuration = new Configuration({
+      organization: "org-mKiOdj05I0xVUxoQeuGVMiVl",
+      apiKey: "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",
+  });
+    const openai = new OpenAIApi(configuration);
+    const completion = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: [{role: "user", content:content_used }],
+        max_tokens:700,
+      });
+    console.log(completion.data.choices[0].message["content"]);
+    return completion.data.choices[0].message["content"];
+  }
